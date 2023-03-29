@@ -31,6 +31,7 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
     return ref.watch(authStateChangeProvider).when(
           data: (data) {
             if (data != null) {
+              print(data.phoneNumber);
               getData(ref, data);
               if (userModel != null) {
                 return const HomeScreen();

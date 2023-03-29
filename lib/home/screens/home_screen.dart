@@ -54,7 +54,9 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
           ],
         ),
         body: StreamBuilder(
-            stream: ref.watch(getProductDataProvider.stream),
+            stream: ref
+                .watch(productAddControllerProvider.notifier)
+                .getProductData(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
@@ -105,7 +107,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
             ProductModel? product;
             navigaToProductAddEditScreen(product);
           },
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       ),
     );
@@ -114,10 +116,10 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
   Widget productUi(List<ProductModel> products) {
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 180,
-            childAspectRatio: 3 / 5,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10),
+            maxCrossAxisExtent: 190,
+            childAspectRatio: 3 / 6,
+            crossAxisSpacing: 5,
+            mainAxisSpacing: 5),
         itemCount: products.length,
         itemBuilder: (_, index) {
           final product = products[index];
@@ -183,7 +185,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
                           height: 5,
                         ),
                         Text(
-                          'Quantity: ${product.category.map((e) => '$e, ')}',
+                          'Category: ${product.category.map((e) => '$e, ')}',
                           maxLines: 2,
                           overflow: TextOverflow.clip,
                           style: const TextStyle(fontSize: 14),

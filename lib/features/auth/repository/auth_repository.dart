@@ -66,7 +66,7 @@ class AuthRepository {
 
     print("return Data 1 $returnData");
     while (!authFunctionIsFinished) {
-      await Future.delayed(const Duration(seconds: 60));
+      await Future.delayed(const Duration(seconds: 10));
     }
     print("return Data 2 $returnData");
     if (returnData.runtimeType == String) {
