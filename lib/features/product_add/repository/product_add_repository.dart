@@ -63,10 +63,13 @@ class ProductAddRepository {
 
       if (productImages.isNotEmpty) {
         for (var i = 0; i < productImages.length; i++) {
-          newProductImageUrls.add(await ref
+          String imageUrl = '';
+          final res = await ref
               .read(commonFirebaseStorageRepositoryProvider)
               .storageFileToFirebase(
-                  'product/${productID}_$i', productImages[i]));
+                  'product/${productID}_$i', productImages[i]);
+          res.fold((l) => throw l.toString(), (r) => imageUrl = r);
+          newProductImageUrls.add(imageUrl);
         }
       } else {
         newProductImageUrls.addAll(productImageUrls);

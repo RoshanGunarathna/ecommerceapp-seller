@@ -103,9 +103,7 @@ class _LoginScreenConsumerState extends ConsumerState<LoginScreen> {
                     width: 100,
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          isLoading = false;
-                        });
+                        print('clicked');
                       },
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(

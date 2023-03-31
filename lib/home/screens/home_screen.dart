@@ -1,11 +1,4 @@
-import 'dart:developer';
-
 import 'package:ecommerce_seller_app/features/product_add/controller/product_add_controller.dart';
-
-import '../../core/palette.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -52,6 +52,10 @@ class AuthController extends StateNotifier<bool> {
       print("response: $response");
       if (response == "verificationCompleted") {
         showSnackBar(context: context, text: 'Verification Completed');
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginInformationScreen()),
+            (route) => false);
       } else {
         Navigator.push(
             context,

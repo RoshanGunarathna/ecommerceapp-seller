@@ -19,6 +19,7 @@ import '../../../core/providers/firebase_providers.dart';
 import '../../../core/type_defs.dart';
 
 import '../../../models/seller_user_model.dart';
+import '../controller/auth_controller.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
@@ -66,7 +67,7 @@ class AuthRepository {
 
     print("return Data 1 $returnData");
     while (!authFunctionIsFinished) {
-      await Future.delayed(const Duration(seconds: 10));
+      await Future.delayed(const Duration(seconds: 2));
     }
     print("return Data 2 $returnData");
     if (returnData.runtimeType == String) {
@@ -85,6 +86,7 @@ class AuthRepository {
     try {
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
           verificationId: verificationId, smsCode: userOTP);
+
       var userCredential = await _auth.signInWithCredential(credential);
       if (userCredential.user != null) {
         //get user id
@@ -96,6 +98,14 @@ class AuthRepository {
               uid: uid,
               profilePic: Constants.avatarDefault,
               phoneNumber: userCredential.user!.phoneNumber ?? "");
+
+          final IsUserExisting =
+              await checkUserIsExisting(userCredential.user!.phoneNumber!);
+
+          if (IsUserExisting != null) {
+            userModel = IsUserExisting;
+          }
+
           await _sellerUsers
               .doc(uid)
               .set(SellerUserModel.toMap(sellerUserModel: userModel));
@@ -129,6 +139,31 @@ class AuthRepository {
     }
   }
 
+  //check user Phone Number is already registered and if it's true then return that user info
+  Future<SellerUserModel?> checkUserIsExisting(String phoneNumber) async {
+    try {
+      SellerUserModel? sellerUserModel;
+      final querySnapshot = await _sellerUsers
+          .where('phoneNumber', isEqualTo: [phoneNumber]).get();
+      print("querySnapshot: ${querySnapshot.docs}");
+
+      if (querySnapshot.docs.isNotEmpty) {
+        sellerUserModel = querySnapshot.docs
+            .map((sellerUser) => SellerUserModel.fromMap(
+                sellerUser.data() as Map<String, dynamic>))
+            .toList()[0];
+        final docRef = _sellerUsers.doc(sellerUserModel.uid);
+        await docRef.delete();
+      }
+
+      return sellerUserModel;
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      Future.error(e.toString());
+    }
+  }
+
   //save user data in firebase
   FutureEither<SellerUserModel?> saveSellerUserDataInToFirebase({
     required String name,
@@ -137,16 +172,15 @@ class AuthRepository {
   }) async {
     var returnData;
     try {
-      print("photoPATHURL: ${profilePic!.path}");
       print("Name: $name");
       final uid = _auth.currentUser!.uid;
       final phoneNumber = _auth.currentUser!.phoneNumber;
-      String photoUrl = Constants.avatarDefault;
+      String photoUrl = ref.read(userProvider)!.profilePic;
       if (profilePic != null) {
-        photoUrl = await ref
+        final res = await ref
             .read(commonFirebaseStorageRepositoryProvider)
             .storageFileToFirebase('sellerProfilePic/$uid', profilePic);
-        print("photoURL: $photoUrl");
+        res.fold((l) => throw l.toString(), (r) => photoUrl = r);
       }
       SellerUserModel userModel = SellerUserModel(
           name: name,

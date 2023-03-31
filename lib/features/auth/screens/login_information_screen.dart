@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/palette.dart';
 import '../../../core/utils.dart';
+import '../../../models/seller_user_model.dart';
 import '../controller/auth_controller.dart';
 
 class LoginInformationScreen extends ConsumerStatefulWidget {
@@ -22,20 +23,14 @@ class LoginInformationScreen extends ConsumerStatefulWidget {
 
 class _LoginInformationScreenConsumerState
     extends ConsumerState<LoginInformationScreen> {
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   File? image;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    nameController.dispose();
+    _nameController.dispose();
   }
 
   void selectImage() async {
@@ -45,14 +40,14 @@ class _LoginInformationScreenConsumerState
     setState(() {});
   }
 
-  void storeUserData() async {
-    String name = nameController.text;
+  void storeUserData({required SellerUserModel user}) async {
+    String name = _nameController.text;
 
     if (name.isEmpty) {
       showSnackBar(context: context, text: 'Please enter your name');
       return null;
     }
-    if (image == null) {
+    if (image == null && user.profilePic.isEmpty) {
       showSnackBar(context: context, text: 'Please add a display picture');
       return null;
     }
@@ -63,6 +58,10 @@ class _LoginInformationScreenConsumerState
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    if (user!.name.isNotEmpty) {
+      _nameController.text = user.name;
+    }
     var size = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
@@ -75,18 +74,18 @@ class _LoginInformationScreenConsumerState
             ),
             Stack(
               children: [
-                image == null
+                image != null
                     ? CircleAvatar(
-                        backgroundColor: whiteColor,
-                        radius: size.height * 0.094,
-                        backgroundImage: const NetworkImage(
-                          Constants.avatarDefault,
-                        ),
-                      )
-                    : CircleAvatar(
                         backgroundColor: secondaryColor,
                         radius: size.height * 0.094,
                         backgroundImage: FileImage(image!),
+                      )
+                    : CircleAvatar(
+                        backgroundColor: whiteColor,
+                        radius: size.height * 0.094,
+                        backgroundImage: NetworkImage(
+                          user.profilePic,
+                        ),
                       ),
                 Positioned(
                   top: 78,
@@ -110,7 +109,7 @@ class _LoginInformationScreenConsumerState
                   child: TextField(
                     style: const TextStyle(fontSize: 20),
                     inputFormatters: [LengthLimitingTextInputFormatter(30)],
-                    controller: nameController,
+                    controller: _nameController,
                     decoration:
                         const InputDecoration(hintText: 'Enter your name'),
                   ),
@@ -123,7 +122,7 @@ class _LoginInformationScreenConsumerState
                   width: size.width * 0.15,
                   child: IconButton(
                     color: secondaryColor,
-                    onPressed: storeUserData,
+                    onPressed: () => storeUserData(user: user),
                     icon: const Icon(Icons.done),
                   ),
                 ),
