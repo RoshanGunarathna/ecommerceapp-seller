@@ -32,3 +32,18 @@ Future<List<File>> pickImages(BuildContext ctx) async {
   }
   return images;
 }
+
+//pick an one image
+Future<File?> pickOneImage(BuildContext ctx) async {
+  File? image;
+  try {
+    var result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      image = File(result.files.single.path!);
+    }
+    return image;
+  } catch (e) {
+    showSnackBar(context: ctx, text: e.toString());
+    throw Future.error(e.toString());
+  }
+}

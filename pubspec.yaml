@@ -48,6 +48,7 @@ dependencies:
   file_picker: ^5.2.6
   carousel_slider: ^4.2.1
   dotted_border: ^2.0.0+3
+  filter_list: ^1.0.2
 
 dev_dependencies:
   flutter_test:

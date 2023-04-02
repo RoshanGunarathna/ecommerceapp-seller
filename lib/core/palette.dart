@@ -9,3 +9,5 @@ const Color blackColorShade1 = Color.fromARGB(170, 3, 3, 3);
 const Color blackColorShade2 = Color.fromARGB(170, 240, 240, 240);
 
 const Color whiteColor = Colors.white;
+const Color greenColor = Colors.green;
+const Color redColor = Colors.red;

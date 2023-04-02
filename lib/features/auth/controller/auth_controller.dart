@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ecommerce_seller_app/features/auth/screens/login_information_screen.dart';
 import 'package:ecommerce_seller_app/features/auth/screens/login_screen.dart';
+import 'package:ecommerce_seller_app/models/category_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +10,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils.dart';
 
 import '../../../home/screens/home_screen.dart';
+
 import '../../../models/seller_user_model.dart';
 import '../repository/auth_repository.dart';
 import '../screens/otp_screen.dart';
 
-//loading notifier
+//get user
 final userProvider = StateProvider<SellerUserModel?>((ref) => null);
 
 //authControllerProvider
@@ -49,7 +51,6 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (response) {
-      print("response: $response");
       if (response == "verificationCompleted") {
         showSnackBar(context: context, text: 'Verification Completed');
         Navigator.pushAndRemoveUntil(
@@ -130,5 +131,10 @@ class AuthController extends StateNotifier<bool> {
           MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false);
     });
+  }
+
+  //get category list
+  Future<bool?> getCategoryData(Ref ref, BuildContext context) async {
+    return await _authRepository.getCategoryData(ref: ref, context: context);
   }
 }

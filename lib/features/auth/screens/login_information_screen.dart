@@ -34,8 +34,7 @@ class _LoginInformationScreenConsumerState
   }
 
   void selectImage() async {
-    final images = await pickImages(context);
-    image = images[0];
+    image = await pickOneImage(context);
 
     setState(() {});
   }

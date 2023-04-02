@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/product_add/screens/product_add_edit_screen.dart';
 import '../../models/product.dart';
+import '../controller/home_controller.dart';
 import '../widgets/appbar_menu.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -47,9 +48,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
           ],
         ),
         body: StreamBuilder(
-            stream: ref
-                .watch(productAddControllerProvider.notifier)
-                .getProductData(),
+            stream: ref.watch(homeControllerProvider.notifier).getProductData,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
@@ -76,7 +75,6 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
                   child: productUi(products),
                 );
               } else {
-                print(snapshot.data!.length);
                 return Center(
                   child: SizedBox(
                     height: 120,
@@ -178,7 +176,25 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
                           height: 5,
                         ),
                         Text(
-                          'Category: ${product.category.map((e) => '$e, ')}',
+                          'Category: ${product.category.map((e) => e.name)}, ',
+                          maxLines: 2,
+                          overflow: TextOverflow.clip,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          'Rating: ${product.rating}',
+                          maxLines: 2,
+                          overflow: TextOverflow.clip,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          'kg: ${product.kg}',
                           maxLines: 2,
                           overflow: TextOverflow.clip,
                           style: const TextStyle(fontSize: 14),
@@ -198,6 +214,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
   }
 
   void navigaToProductAddEditScreen(ProductModel? product) {
+    // ref.read(homeControllerProvider.notifier).getAndSaveProductData();
     Navigator.pushNamed(context, ProductAddEditScreen.routeName,
         arguments: product);
   }

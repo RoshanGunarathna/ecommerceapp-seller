@@ -1,18 +1,15 @@
 import 'dart:io';
 
-import 'package:ecommerce_seller_app/features/auth/screens/login_information_screen.dart';
-import 'package:ecommerce_seller_app/models/product.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ecommerce_seller_app/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
+
 import 'package:uuid/uuid.dart';
 
 import '../../../core/utils.dart';
 
-import '../../../home/screens/home_screen.dart';
 import '../../../models/category_model.dart';
-import '../../../models/seller_user_model.dart';
+
 import '../../auth/controller/auth_controller.dart';
 import '../repository/product_add_repository.dart';
 
@@ -20,29 +17,19 @@ import '../repository/product_add_repository.dart';
 final productAddControllerProvider =
     StateNotifierProvider<ProductAddController, bool>(
   (ref) => ProductAddController(
-    authRepository: ref.watch(productAddRepositoryProvider),
+    productAddRepository: ref.watch(productAddRepositoryProvider),
     ref: ref,
   ),
 );
 
-final getProductDataProvider = StreamProvider<List<ProductModel>>((ref) {
-  final productAddController = ref.watch(productAddControllerProvider.notifier);
-  return productAddController.getProductData();
-});
-
 class ProductAddController extends StateNotifier<bool> {
-  final ProductAddRepository _authRepository;
+  final ProductAddRepository _productAddRepository;
   final Ref _ref;
   ProductAddController(
-      {required ProductAddRepository authRepository, required Ref ref})
-      : _authRepository = authRepository,
+      {required ProductAddRepository productAddRepository, required Ref ref})
+      : _productAddRepository = productAddRepository,
         _ref = ref,
         super(false);
-
-  //get current product data
-  Stream<List<ProductModel>> getProductData() {
-    return _authRepository.getProductData();
-  }
 
   //save user data in the firebase
   void saveProductDataInFirebase({
@@ -55,29 +42,51 @@ class ProductAddController extends StateNotifier<bool> {
     required int quantity,
     required BuildContext context,
     required String productID,
+    double? kg,
   }) async {
     state = true;
     final currentUser = _ref.read(userProvider);
-    final categories = category.map((e) => e.categoryName).toList();
+
     const uuid = Uuid();
     String productId = productID.isNotEmpty ? productID : uuid.v1();
 
-    final user = await _authRepository.saveProductInFirebase(
-        ref: _ref,
-        productImages: productImages,
-        productImageUrls: productImageUrls,
-        productID: productId,
-        productName: productName,
-        productDescription: productDescription,
-        category: categories,
-        sellerUserId: currentUser!.uid,
-        productPrice: productPrice,
-        quantity: quantity);
+    final user = await _productAddRepository.saveProductInFirebase(
+      ref: _ref,
+      productImages: productImages,
+      productImageUrls: productImageUrls,
+      productID: productId,
+      productName: productName,
+      productDescription: productDescription,
+      category: category,
+      sellerUserId: currentUser!.uid,
+      productPrice: productPrice,
+      quantity: quantity,
+      kg: kg,
+    );
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (isComplete) {
       showSnackBar(context: context, text: "Product is saved");
       Navigator.pop(context);
+    });
+  }
+
+  //get category list
+  Future<bool> getCategoryData(BuildContext context) async {
+    return await _productAddRepository.getCategoryData(
+        ref: _ref, context: context);
+  }
+
+  //Delete a product
+  Future<void> deleteAProduct(
+      {required BuildContext context, required String productID}) async {
+    state = true;
+    final res = await _productAddRepository.deleteAProduct(productID);
+    state = false;
+    res.fold((l) => showSnackBar(context: context, text: l.message), (r) {
+      showSnackBar(context: context, text: "Product is deleted");
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomeScreen.routeName, (route) => false);
     });
   }
 }

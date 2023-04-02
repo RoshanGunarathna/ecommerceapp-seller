@@ -4,23 +4,26 @@ import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:ecommerce_seller_app/features/auth/controller/auth_controller.dart';
-import 'package:ecommerce_seller_app/features/product_add/controller/product_add_controller.dart';
-import 'package:uuid/uuid.dart';
 
+import 'package:ecommerce_seller_app/features/product_add/controller/product_add_controller.dart';
+
+import 'package:flutter/scheduler.dart';
+
+import '../../../core/common/controller/common_get_category_controller.dart';
 import '../../../core/common/custom_button.dart';
 import '../../../core/common/widgets/custom_textfield.dart';
+
 import '../../../core/palette.dart';
 import '../../../core/utils.dart';
-import '../../../home/screens/home_screen.dart';
+
 import '../../../models/product.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart';
 
-import '../../../models/seller_user_model.dart';
 import '../../../models/category_model.dart';
+import '../widget/delete_confimation.dart';
+import '../widget/showDialog.dart';
 
 class ProductAddEditScreen extends ConsumerStatefulWidget {
   static const routeName = '/addEdit-screen';
@@ -42,11 +45,15 @@ class _ProductAddEditScreenConsumerState
   final _descriptionController = TextEditingController();
   final _productPriceController = TextEditingController();
   final _quantityController = TextEditingController();
+  final _kgController = TextEditingController();
 
-  List<CategoryModel> selectedCategory = [];
   List<File> _images = [];
   List<String> _imageUrls = [];
   final _addProductFormKey = GlobalKey<FormState>();
+
+  //for the select category part
+  List<CategoryModel> _selectedCategory = [];
+  List<CategoryModel> _categoryList = [];
 
   @override
   void dispose() {
@@ -56,35 +63,46 @@ class _ProductAddEditScreenConsumerState
     _productPriceController.dispose();
     _descriptionController.dispose();
     _quantityController.dispose();
+    _kgController.dispose();
   }
 
-  final _categoryList = [
-    CategoryModel(
-        categoryName: 'Fruits', isCategoryMarked: false, categoryId: 01),
-    CategoryModel(
-        categoryName: 'Vegetable', isCategoryMarked: false, categoryId: 01),
-    CategoryModel(
-        categoryName: 'Drinks', isCategoryMarked: false, categoryId: 01),
-    CategoryModel(
-        categoryName: 'Meat', isCategoryMarked: false, categoryId: 01),
-  ];
+//I got error from run this function can you tell what is that
+  void refreshCategoryList() async {
+    final isOver = await ref
+        .read(productAddControllerProvider.notifier)
+        .getCategoryData(context);
+
+    if (isOver) {
+      print("*****this method is run");
+      _categoryList = await ref.read(categoryProvider)!;
+
+      setState(() {
+        _categoryList;
+      });
+    }
+  }
 
   @override
   void initState() {
-    print('beforeProductCategoryListLength ${_categoryList.length}');
-
     _addScreenOrNot();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      refreshCategoryList();
+    });
     // TODO: implement initState
     super.initState();
   }
 
   void _addScreenOrNot() {
+    // If the edit screen
     if (widget.product != null) {
       _productNameController.text = widget.product!.name;
       _productPriceController.text = widget.product!.price.toString();
       _quantityController.text = widget.product!.quantity.toString();
       _descriptionController.text = widget.product!.description;
       _imageUrls = widget.product!.images;
+      _kgController.text =
+          widget.product!.kg != null ? widget.product!.kg.toString() : "";
+      _selectedCategory = widget.product!.category;
     }
   }
 
@@ -96,40 +114,39 @@ class _ProductAddEditScreenConsumerState
     });
   }
 
-  void _selectedCategoryCollector(
-      CategoryModel selectedCategoryModel, bool isAdd) {
-    if (isAdd) {
-      selectedCategory.add(selectedCategoryModel);
-      print(selectedCategoryModel.categoryId);
-    } else {
-      var index = selectedCategory.indexWhere(
-          (element) => element.categoryId == selectedCategoryModel.categoryId);
-      selectedCategory.removeAt(index);
-    }
-  }
-
   void _storeProductData(BuildContext ctx) {
     if (_images.isEmpty && _imageUrls.isEmpty) {
       showSnackBar(context: ctx, text: 'Please add product image');
       return;
     }
 
-    if (selectedCategory.isEmpty) {
+    if (_selectedCategory.isEmpty) {
       return showSnackBar(
           context: ctx, text: 'Please select 1 or more category');
     }
 
+    //save data in firebase
     ref.read(productAddControllerProvider.notifier).saveProductDataInFirebase(
           productImageUrls: _imageUrls,
           productImages: _images,
           productName: _productNameController.text,
           productDescription: _descriptionController.text,
-          category: selectedCategory,
+          category: _selectedCategory,
           productPrice: double.parse(_productPriceController.text),
           quantity: int.parse(_quantityController.text),
           context: ctx,
           productID: widget.product != null ? widget.product!.id : "",
+          kg: _kgController.text.isNotEmpty
+              ? double.parse(_kgController.text)
+              : null,
         );
+  }
+
+  void _deleteProduct(
+      {required BuildContext ctx, required String productID}) async {
+    ref
+        .read(productAddControllerProvider.notifier)
+        .deleteAProduct(context: context, productID: productID);
   }
 
   @override
@@ -143,10 +160,24 @@ class _ProductAddEditScreenConsumerState
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         actions: [
+          widget.product != null
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CustomButton(
+                    backgroundColor: redColor,
+                    text: 'Delete',
+                    onPressed: () => deleteConfirmationDialog(
+                      context: context,
+                      onConfirm: () => _deleteProduct(
+                          ctx: context, productID: widget.product!.id),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomButton(
-              backgroundColor: Colors.green,
+              backgroundColor: greenColor,
               text: 'Sell',
               onPressed: () => _storeProductData(context),
             ),
@@ -249,68 +280,75 @@ class _ProductAddEditScreenConsumerState
                 const SizedBox(
                   height: 10,
                 ),
-                CustomTextField(
-                    controller: _productPriceController, hintText: 'Price'),
+                TextFormField(
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  controller: _kgController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black38),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black38),
+                    ),
+                    hintText: "Kg  \"You can have this field EMPTY\"",
+                  ),
+                  maxLines: 1,
+                ),
                 const SizedBox(
                   height: 10,
                 ),
                 CustomTextField(
-                    controller: _quantityController, hintText: 'Quantity'),
+                  controller: _productPriceController,
+                  hintText: 'Price',
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
                 const SizedBox(
                   height: 10,
                 ),
-                SizedBox(
-                  height: 200,
-                  width: 300,
-                  child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 80,
-                              childAspectRatio: 15 / 6.5,
-                              crossAxisSpacing: 4,
-                              mainAxisSpacing: 10),
-                      itemCount: _categoryList.length,
-                      itemBuilder: (context, categoryIndex) {
-                        return InkWell(
-                          onTap: () {
-                            final category = _categoryList[categoryIndex];
-                            if (category.isCategoryMarked) {
-                              _categoryList[categoryIndex] = CategoryModel(
-                                  categoryName: category.categoryName,
-                                  isCategoryMarked: false,
-                                  categoryId: category.categoryId);
-                              setState(() {
-                                _categoryList;
-                              });
-                              _selectedCategoryCollector(
-                                  _categoryList[categoryIndex], false);
-                            } else {
-                              _categoryList[categoryIndex] = CategoryModel(
-                                  categoryName: category.categoryName,
-                                  isCategoryMarked: true,
-                                  categoryId: category.categoryId);
-                              setState(() {
-                                _categoryList;
-                              });
-                              _selectedCategoryCollector(
-                                  _categoryList[categoryIndex], true);
-                            }
-                          },
-                          child: Container(
+                CustomTextField(
+                  controller: _quantityController,
+                  hintText: 'Quantity',
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                _selectedCategory.isEmpty
+                    ? const Center(child: Text('No Category selected'))
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 82,
+                                childAspectRatio: 15 / 6.5,
+                                crossAxisSpacing: 4,
+                                mainAxisSpacing: 10),
+                        itemCount: _selectedCategory.length,
+                        itemBuilder: (context, index) {
+                          return Container(
                             alignment: Alignment.center,
-                            height: 30,
-                            width: 50,
                             decoration: BoxDecoration(
-                                color: _categoryList[categoryIndex]
-                                        .isCategoryMarked
-                                    ? const Color.fromARGB(255, 92, 230, 97)
-                                    : const Color.fromARGB(255, 192, 192, 192),
+                                color: Colors.green,
                                 borderRadius: BorderRadius.circular(30)),
-                            child:
-                                Text(_categoryList[categoryIndex].categoryName),
-                          ),
-                        );
-                      }),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 5),
+                              child: Text(
+                                _selectedCategory[index].name,
+                                style: const TextStyle(color: whiteColor),
+                                maxLines: 1,
+                              ),
+                            ),
+                          );
+                        }),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: openFilterDialog,
+                      child: const Text("Category")),
                 ),
                 const SizedBox(
                   height: 10,
@@ -321,5 +359,44 @@ class _ProductAddEditScreenConsumerState
         ),
       ),
     );
+  }
+
+  void openFilterDialog() async {
+    showMaterialDialog(
+      context: context,
+      selectedCategory: _selectedCategory,
+      categoryList: _categoryList,
+      choiceChipLabel: (category) => category!.name,
+      validateSelectedItem: (list, val) => list!.contains(val),
+      onItemSearch: (category, query) {
+        return category.name.toLowerCase().contains(query.toLowerCase());
+      },
+      onApplyButtonClick: (list) {
+        setState(() {
+          _selectedCategory = List.from(list!);
+        });
+        Navigator.pop(context);
+      },
+    );
+
+    // await FilterListDialog.display<CategoryModel>(
+    //   context,
+    //   listData: _categoryList,
+    //   selectedListData: _selectedCategory,
+    //   choiceChipLabel: (category) => category!.name,
+    //   validateSelectedItem: (list, val) => list!.contains(val),
+    //   onItemSearch: (category, query) {
+    //     return category.name.toLowerCase().contains(query.toLowerCase());
+    //   },
+    //   onApplyButtonClick: (list) {
+    //     setState(() {
+    //       _selectedCategory = List.from(list!);
+    //     });
+    //     Navigator.pop(context);
+    //   },
+    //   themeData: FilterListThemeData.light(context),
+    //   backgroundColor: Colors.black,
+
+    // );
   }
 }

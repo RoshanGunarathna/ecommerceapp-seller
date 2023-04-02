@@ -74,6 +74,14 @@
           }
         },
         {
+          "client_id": "1041881133708-mj6tcn31petqptnmspk4ndn2qp8tb9ba.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ecommerce_seller_app",
+            "certificate_hash": "4241888a66f3f8a25b111feb41939b3045f8c50c"
+          }
+        },
+        {
           "client_id": "1041881133708-uvhau3utr9qbe53a7lt7ean9qku64dv9.apps.googleusercontent.com",
           "client_type": 3
         }

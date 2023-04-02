@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../core/common/controller/common_get_category_controller.dart';
 import '../../../core/common/repositories/common_firebase_storage_repository.dart';
+import '../../../core/common/repositories/common_get_category_repository.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 
@@ -18,6 +20,7 @@ import '../../../core/failure.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/type_defs.dart';
 
+import '../../../models/category_model.dart';
 import '../../../models/seller_user_model.dart';
 import '../controller/auth_controller.dart';
 
@@ -59,17 +62,16 @@ class AuthRepository {
       verificationFailed: (error) => returnData = error,
       codeSent: ((verificationId, forceResendingToken) {
         returnData = verificationId;
-        print(verificationId);
+
         authFunctionIsFinished = true;
       }),
       codeAutoRetrievalTimeout: (verificationId) {},
     );
 
-    print("return Data 1 $returnData");
     while (!authFunctionIsFinished) {
       await Future.delayed(const Duration(seconds: 2));
     }
-    print("return Data 2 $returnData");
+
     if (returnData.runtimeType == String) {
       return right(returnData);
     } else {
@@ -232,5 +234,13 @@ class AuthRepository {
     } catch (e) {
       return left(Failure(e.toString()));
     }
+  }
+
+  //get category list
+  Future<bool?> getCategoryData(
+      {required Ref ref, required BuildContext context}) async {
+    return await ref
+        .read(commonGetCategoryControllerProvider.notifier)
+        .getCategoryData(context);
   }
 }

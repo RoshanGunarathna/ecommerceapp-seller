@@ -1,20 +1,24 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../core/common/controller/common_get_category_controller.dart';
 import '../../../core/common/repositories/common_firebase_storage_repository.dart';
 
 import '../../../core/constants/firebase_constants.dart';
 
 import '../../../core/failure.dart';
 import '../../../core/providers/firebase_providers.dart';
-import '../../../core/type_defs.dart';
 
+import '../../../core/type_defs.dart';
+import '../../../models/category_model.dart';
 import '../../../models/product.dart';
 
 final productAddRepositoryProvider = Provider(
@@ -37,13 +41,6 @@ class ProductAddRepository {
   CollectionReference get _products =>
       _firestore.collection(FirebaseConstants.productCollection);
 
-//get product data
-  Stream<List<ProductModel>> getProductData() {
-    return _products.snapshots().map((snap) => snap.docs.map((product) {
-          return ProductModel.fromMap(product.data() as Map<String, dynamic>);
-        }).toList());
-  }
-
 //save product data in firebase
   FutureEither<bool> saveProductInFirebase({
     required Ref ref,
@@ -52,10 +49,11 @@ class ProductAddRepository {
     required String productID,
     required String productName,
     required String productDescription,
-    required List<String> category,
+    required List<CategoryModel> category,
     required String sellerUserId,
     required double productPrice,
     required int quantity,
+    required double? kg,
   }) async {
     var returnData;
     try {
@@ -84,10 +82,32 @@ class ProductAddRepository {
         images: newProductImageUrls,
         price: productPrice,
         quantity: quantity,
+        kg: kg,
       );
 
       await _products.doc(productID).set(ProductModel.toMap(product));
 
+      return right(true);
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  //get category list
+  Future<bool> getCategoryData(
+      {required Ref ref, required BuildContext context}) async {
+    return await ref
+        .read(commonGetCategoryControllerProvider.notifier)
+        .getCategoryData(context);
+  }
+
+  //delete a Product
+  FutureEither<bool> deleteAProduct(String productID) async {
+    try {
+      final docRef = _products.doc(productID);
+      await docRef.delete();
       return right(true);
     } on FirebaseException catch (e) {
       throw e.message!;
