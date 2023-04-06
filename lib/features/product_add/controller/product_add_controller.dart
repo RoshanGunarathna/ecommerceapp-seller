@@ -42,7 +42,8 @@ class ProductAddController extends StateNotifier<bool> {
     required int quantity,
     required BuildContext context,
     required String productID,
-    double? kg,
+    required int? discount,
+    required double? kg,
   }) async {
     state = true;
     final currentUser = _ref.read(userProvider);
@@ -62,6 +63,7 @@ class ProductAddController extends StateNotifier<bool> {
       productPrice: productPrice,
       quantity: quantity,
       kg: kg,
+      discount: discount,
     );
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),

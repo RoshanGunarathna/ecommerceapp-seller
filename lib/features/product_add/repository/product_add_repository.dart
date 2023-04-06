@@ -54,8 +54,10 @@ class ProductAddRepository {
     required double productPrice,
     required int quantity,
     required double? kg,
+    required int? discount,
   }) async {
     var returnData;
+    print("discount: $discount");
     try {
       late List<String> newProductImageUrls = [];
 
@@ -83,6 +85,7 @@ class ProductAddRepository {
         price: productPrice,
         quantity: quantity,
         kg: kg,
+        discount: discount,
       );
 
       await _products.doc(productID).set(ProductModel.toMap(product));

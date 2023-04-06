@@ -46,6 +46,7 @@ class _ProductAddEditScreenConsumerState
   final _productPriceController = TextEditingController();
   final _quantityController = TextEditingController();
   final _kgController = TextEditingController();
+  final _discountController = TextEditingController();
 
   List<File> _images = [];
   List<String> _imageUrls = [];
@@ -64,9 +65,9 @@ class _ProductAddEditScreenConsumerState
     _descriptionController.dispose();
     _quantityController.dispose();
     _kgController.dispose();
+    _discountController.dispose();
   }
 
-//I got error from run this function can you tell what is that
   void refreshCategoryList() async {
     final isOver = await ref
         .read(productAddControllerProvider.notifier)
@@ -138,6 +139,9 @@ class _ProductAddEditScreenConsumerState
           productID: widget.product != null ? widget.product!.id : "",
           kg: _kgController.text.isNotEmpty
               ? double.parse(_kgController.text)
+              : null,
+          discount: _discountController.text.isNotEmpty
+              ? int.parse(_discountController.text)
               : null,
         );
   }
@@ -310,8 +314,25 @@ class _ProductAddEditScreenConsumerState
                 CustomTextField(
                   controller: _quantityController,
                   hintText: 'Quantity',
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  controller: _discountController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black38),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black38),
+                    ),
+                    hintText:
+                        "Discount Price \"You can have this field EMPTY\"",
+                  ),
+                  maxLines: 1,
                 ),
                 const SizedBox(
                   height: 10,

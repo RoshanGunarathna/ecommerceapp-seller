@@ -199,6 +199,15 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
                           overflow: TextOverflow.clip,
                           style: const TextStyle(fontSize: 14),
                         ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          'discount: ${product.discount}',
+                          maxLines: 2,
+                          overflow: TextOverflow.clip,
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ],
                     ),
                   ),

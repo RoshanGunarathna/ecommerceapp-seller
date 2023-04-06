@@ -36,15 +36,15 @@ class HomeRepository {
     final QuerySnapshot querySnapshot = await _products.get();
 
     for (var doc in querySnapshot.docs) {
-      // ProductModel? productModel;
-      // final querySnapshott =
-      //     await _products.where('id', isNotEqualTo: [doc.id]).get();
-      // print("querySnapshot: ${querySnapshot}");
+      ProductModel? productModel;
+      final querySnapshott =
+          await _products.where('id', isNotEqualTo: [doc.id]).get();
+      print("querySnapshot: ${querySnapshot}");
 
-      // for (var element in querySnapshott.docs) {
-      //   final docRef = _products.doc(element.id);
-      //   await docRef.delete();
-      // }
+      for (var element in querySnapshott.docs) {
+        final docRef = _products.doc(element.id);
+        await docRef.delete();
+      }
     }
 
     return querySnapshot.docs.map((productData) {

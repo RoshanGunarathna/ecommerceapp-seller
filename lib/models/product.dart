@@ -15,6 +15,7 @@ class ProductModel {
   final int quantity;
   final List<Rating>? rating;
   final double? kg;
+  final int? discount;
   ProductModel({
     required this.id,
     required this.name,
@@ -26,6 +27,7 @@ class ProductModel {
     required this.quantity,
     required this.kg,
     this.rating,
+    this.discount,
   });
 
   static Map<String, dynamic> toMap(ProductModel productModel) {
@@ -44,6 +46,7 @@ class ProductModel {
           ? productModel.rating!.map((ratingModel) => Rating.toMap(ratingModel))
           : null,
       'kg': productModel.kg,
+      'discount': productModel.discount,
     };
   }
 
@@ -62,6 +65,7 @@ class ProductModel {
       rating: map['rating'] != null
           ? List<Rating>.from(map['rating']?.map((res) => Rating.fromMap(res)))
           : null,
+      discount: map['discount'] != null ? map['discount'] as int : null,
     );
 
     return productModel;
