@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/common/error_text.dart';
 import '../../../core/constants/assets_path.dart';
-import '../../../home/screens/home_screen.dart';
+import '../../home/screens/home_screen.dart';
 import '../../../models/seller_user_model.dart';
 import '../controller/auth_controller.dart';
 

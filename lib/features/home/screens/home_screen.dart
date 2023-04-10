@@ -2,9 +2,11 @@ import 'package:ecommerce_seller_app/features/product_add/controller/product_add
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-import '../../features/product_add/screens/product_add_edit_screen.dart';
-import '../../models/product.dart';
+import '../../../core/common/controller/common_get_date_and_time_controller.dart';
+import '../../product_add/screens/product_add_edit_screen.dart';
+import '../../../models/product.dart';
 import '../controller/home_controller.dart';
 import '../widgets/appbar_menu.dart';
 
@@ -222,9 +224,11 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
     Navigator.pop(context);
   }
 
-  void navigaToProductAddEditScreen(ProductModel? product) {
-    // ref.read(homeControllerProvider.notifier).getAndSaveProductData();
+  void navigaToProductAddEditScreen(ProductModel? product) async {
     Navigator.pushNamed(context, ProductAddEditScreen.routeName,
         arguments: product);
+
+    //dev codes
+    // ref.read(homeControllerProvider.notifier).getAndSaveProductData(context);
   }
 }

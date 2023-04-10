@@ -9,7 +9,7 @@ import '../repositories/common_get_category_repository.dart';
 //get category list
 final categoryProvider = StateProvider<List<CategoryModel>?>((ref) => null);
 
-//authControllerProvider
+//getCategoryControllerProvider
 final commonGetCategoryControllerProvider =
     StateNotifierProvider<CommonGetCategoryController, bool>(
   (ref) => CommonGetCategoryController(

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../core/common/controller/common_get_date_and_time_controller.dart';
 import '../../../core/common/repositories/common_firebase_storage_repository.dart';
 import '../../../core/common/repositories/common_get_category_repository.dart';
 import '../../../core/constants/constants.dart';
@@ -28,18 +29,22 @@ final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
     firestore: ref.read(firestoreProvider),
     auth: ref.read(authProvider),
+    ref: ref,
   ),
 );
 
 class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final Ref _ref;
 
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
+    required Ref ref,
   })  : _auth = auth,
-        _firestore = firestore;
+        _firestore = firestore,
+        _ref = ref;
 
   CollectionReference get _sellerUsers =>
       _firestore.collection(FirebaseConstants.userCollection);
@@ -83,6 +88,7 @@ class AuthRepository {
   FutureEither<SellerUserModel?> verifyOTP({
     required String verificationId,
     required String userOTP,
+    required BuildContext context,
   }) async {
     var returnData;
     try {
@@ -94,12 +100,22 @@ class AuthRepository {
         //get user id
         final uid = userCredential.user!.uid;
 
+        //get the time&date in sri lanka
+        // ignore: use_build_context_synchronously
+        String? dateAndTime = await _ref
+            .read(commonGetDateAndTimeControllerProvider.notifier)
+            .getDateAndTime(context);
+
         if (userCredential.additionalUserInfo!.isNewUser) {
           SellerUserModel userModel = SellerUserModel(
-              name: "",
-              uid: uid,
-              profilePic: Constants.avatarDefault,
-              phoneNumber: userCredential.user!.phoneNumber ?? "");
+            name: "",
+            uid: uid,
+            profilePic: Constants.avatarDefault,
+            phoneNumber: userCredential.user!.phoneNumber ?? "",
+            dateTime: dateAndTime != null
+                ? DateTime.parse(dateAndTime)
+                : DateTime.now(),
+          );
 
           final IsUserExisting =
               await checkUserIsExisting(userCredential.user!.phoneNumber!);
@@ -108,9 +124,8 @@ class AuthRepository {
             userModel = IsUserExisting;
           }
 
-          await _sellerUsers
-              .doc(uid)
-              .set(SellerUserModel.toMap(sellerUserModel: userModel));
+          await _sellerUsers.doc(uid).set(SellerUserModel.toMap(
+              sellerUserModel: userModel, searchKeyword: []));
 
           //get current user data and return userData to controller
           SellerUserModel? user;
@@ -171,6 +186,7 @@ class AuthRepository {
     required String name,
     required File? profilePic,
     required Ref ref,
+    required BuildContext context,
   }) async {
     var returnData;
     try {
@@ -178,20 +194,45 @@ class AuthRepository {
       final uid = _auth.currentUser!.uid;
       final phoneNumber = _auth.currentUser!.phoneNumber;
       String photoUrl = ref.read(userProvider)!.profilePic;
+      DateTime? dateTime = ref.read(userProvider)!.dateTime;
       if (profilePic != null) {
         final res = await ref
             .read(commonFirebaseStorageRepositoryProvider)
             .storageFileToFirebase('sellerProfilePic/$uid', profilePic);
         res.fold((l) => throw l.toString(), (r) => photoUrl = r);
       }
+      //get the time&date in sri lanka
+      // ignore: use_build_context_synchronously
+      String? dateAndTime;
+      if (dateTime == null) {
+        dateAndTime = await _ref
+            .read(commonGetDateAndTimeControllerProvider.notifier)
+            .getDateAndTime(context);
+      }
+
       SellerUserModel userModel = SellerUserModel(
-          name: name,
-          uid: uid,
-          profilePic: photoUrl,
-          phoneNumber: phoneNumber ?? "");
-      await _sellerUsers
-          .doc(uid)
-          .set(SellerUserModel.toMap(sellerUserModel: userModel));
+        name: name,
+        uid: uid,
+        profilePic: photoUrl,
+        phoneNumber: phoneNumber ?? "",
+        dateTime: dateTime ??
+            (dateAndTime != null
+                ? DateTime.parse(dateAndTime)
+                : DateTime.now()),
+      );
+
+      //Generate search Keywords
+      final List<String> searchKeyword = [];
+      final splittedMultipleWords = userModel.name.trim().split(" ");
+      for (var element in splittedMultipleWords) {
+        final String wordToLowercase = element.toLowerCase();
+        for (var i = 1; i < wordToLowercase.length + 1; i++) {
+          searchKeyword.add(wordToLowercase.substring(0, i));
+        }
+      }
+
+      await _sellerUsers.doc(uid).set(SellerUserModel.toMap(
+          sellerUserModel: userModel, searchKeyword: searchKeyword));
 
       //get current user data and return userData to controller
       SellerUserModel? user;

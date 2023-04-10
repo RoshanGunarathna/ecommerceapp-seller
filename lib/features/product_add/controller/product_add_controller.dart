@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ecommerce_seller_app/home/screens/home_screen.dart';
+import 'package:ecommerce_seller_app/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,6 +64,7 @@ class ProductAddController extends StateNotifier<bool> {
       quantity: quantity,
       kg: kg,
       discount: discount,
+      context: context,
     );
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),

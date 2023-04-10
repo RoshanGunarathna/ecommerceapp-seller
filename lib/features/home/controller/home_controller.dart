@@ -5,8 +5,8 @@ import 'package:ecommerce_seller_app/models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/seller_user_model.dart';
-import '../../models/product.dart';
+import '../../../../models/seller_user_model.dart';
+import '../../../models/product.dart';
 import '../repository/home_repository.dart';
 
 //get user
@@ -33,7 +33,7 @@ class HomeController extends StateNotifier<bool> {
       _homeRepository.getProductData();
 
 //dev Code
-  Future<void> getAndSaveProductData() async {
-    await _homeRepository.getAndSaveProductData();
+  Future<void> getAndSaveProductData(BuildContext context) async {
+    await _homeRepository.getAndSaveProductData(_ref, context);
   }
 }

@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils.dart';
 
-import '../../../home/screens/home_screen.dart';
+import '../../home/screens/home_screen.dart';
 
 import '../../../models/seller_user_model.dart';
 import '../repository/auth_repository.dart';
@@ -71,7 +71,7 @@ class AuthController extends StateNotifier<bool> {
       BuildContext context, String verificationId, String userOTP) async {
     state = true;
     final user = await _authRepository.verifyOTP(
-        verificationId: verificationId, userOTP: userOTP);
+        context: context, verificationId: verificationId, userOTP: userOTP);
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (userModel) {
@@ -91,7 +91,7 @@ class AuthController extends StateNotifier<bool> {
   }) async {
     state = true;
     final user = await _authRepository.saveSellerUserDataInToFirebase(
-        name: name, profilePic: profilePic, ref: _ref);
+        context: context, name: name, profilePic: profilePic, ref: _ref);
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);

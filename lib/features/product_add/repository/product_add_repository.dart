@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../core/common/controller/common_get_date_and_time_controller.dart';
 import '../../../core/common/repositories/common_firebase_storage_repository.dart';
 
 import '../../../core/constants/firebase_constants.dart';
@@ -55,6 +56,7 @@ class ProductAddRepository {
     required int quantity,
     required double? kg,
     required int? discount,
+    required BuildContext context,
   }) async {
     var returnData;
     print("discount: $discount");
@@ -75,6 +77,12 @@ class ProductAddRepository {
         newProductImageUrls.addAll(productImageUrls);
       }
 
+      //get the time&date in sri lanka
+      String? dateAndTime = await ref
+          .read(commonGetDateAndTimeControllerProvider.notifier)
+          .getDateAndTime(context);
+
+      //Product to save in firebase
       var product = ProductModel(
         id: productID,
         name: productName,
@@ -86,9 +94,23 @@ class ProductAddRepository {
         quantity: quantity,
         kg: kg,
         discount: discount,
+        dateTime:
+            dateAndTime != null ? DateTime.parse(dateAndTime) : DateTime.now(),
       );
 
-      await _products.doc(productID).set(ProductModel.toMap(product));
+      //Generate search Keywords
+      final List<String> searchKeyword = [];
+      final splittedMultipleWords = product.name.trim().split(" ");
+      for (var element in splittedMultipleWords) {
+        final String wordToLowercase = element.toLowerCase();
+        for (var i = 1; i < wordToLowercase.length + 1; i++) {
+          searchKeyword.add(wordToLowercase.substring(0, i));
+        }
+      }
+
+      //save a product in firebase function
+      await _products.doc(productID).set(ProductModel.toMap(
+          productModel: product, searchKeyword: searchKeyword));
 
       return right(true);
     } on FirebaseException catch (e) {

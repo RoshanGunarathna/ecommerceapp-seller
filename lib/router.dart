@@ -3,7 +3,7 @@ import 'package:ecommerce_seller_app/models/product.dart';
 import 'package:flutter/material.dart';
 
 import 'core/common/error_text.dart';
-import 'home/screens/home_screen.dart';
+import 'features/home/screens/home_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
