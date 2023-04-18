@@ -59,7 +59,7 @@ class ProductAddRepository {
     required BuildContext context,
   }) async {
     var returnData;
-    print("discount: $discount");
+
     try {
       late List<String> newProductImageUrls = [];
 
@@ -78,6 +78,7 @@ class ProductAddRepository {
       }
 
       //get the time&date in sri lanka
+      // ignore: use_build_context_synchronously
       String? dateAndTime = await ref
           .read(commonGetDateAndTimeControllerProvider.notifier)
           .getDateAndTime(context);

@@ -32,7 +32,7 @@ class HomeController extends StateNotifier<bool> {
   Stream<List<ProductModel>> get getProductData =>
       _homeRepository.getProductData();
 
-//dev Code
+  //dev codes ....................................................
   Future<void> getAndSaveProductData(BuildContext context) async {
     await _homeRepository.getAndSaveProductData(_ref, context);
   }

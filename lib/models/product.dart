@@ -51,7 +51,7 @@ class ProductModel {
             searchKeyword.add(wordToLowercase.substring(0, i));
           }
         }
-        CategoryModel.toMap(
+        return CategoryModel.toMap(
             categoryModel: category, searchKeyword: searchKeyword);
       }),
       'sellerUserId': productModel.sellerUserId,

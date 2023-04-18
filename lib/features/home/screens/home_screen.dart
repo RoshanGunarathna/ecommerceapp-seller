@@ -228,7 +228,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
     Navigator.pushNamed(context, ProductAddEditScreen.routeName,
         arguments: product);
 
-    //dev codes
+    //dev codes ....................................................
     // ref.read(homeControllerProvider.notifier).getAndSaveProductData(context);
   }
 }

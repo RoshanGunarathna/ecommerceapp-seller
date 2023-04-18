@@ -36,7 +36,7 @@ class HomeRepository {
         }).toList());
   }
 
-  //dev codes
+  //dev codes ....................................................
   //get all the products
   Future<List<CategoryModel>> getProductDataFuture() async {
     final QuerySnapshot querySnapshot =
@@ -48,6 +48,7 @@ class HomeRepository {
     }).toList();
   }
 
+  //dev codes ....................................................
   //change and save
   Future<void> saveProductData(
       List<CategoryModel> sellerUserList, Ref ref, BuildContext context) async {
@@ -71,12 +72,13 @@ class HomeRepository {
             dateAndTime != null ? DateTime.parse(dateAndTime) : DateTime.now(),
       );
 
-      await _firestore.collection("category").doc(sellerUser.id).set(
-          CategoryModel.toMap(
-              categoryModel: sellerUser, searchKeyword: searchKeyword));
+      // await _firestore.collection("category").doc(sellerUser.id).set(
+      //     CategoryModel.toMap(
+      //         categoryModel: sellerUser, searchKeyword: searchKeyword));
     }
   }
 
+  //dev codes ....................................................
   //trigger upper methods
   Future<void> getAndSaveProductData(Ref ref, BuildContext context) async {
     List<CategoryModel> products = await getProductDataFuture();
