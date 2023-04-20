@@ -23,6 +23,8 @@ class CategoryModel {
   }
 
   static CategoryModel fromMap(Map<String, dynamic> map) {
+    final red = map['dateTime'];
+    print("dateTime IN category Model From Map: ${red}");
     return CategoryModel(
         name: map['name'] as String,
         id: map['id'] as String,

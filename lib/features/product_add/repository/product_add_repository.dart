@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_seller_app/models/shipping_category_model.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class ProductAddRepository {
     required double? kg,
     required int? discount,
     required BuildContext context,
+    required ShippingCategoryModel shippingCategory,
   }) async {
     var returnData;
 
@@ -97,6 +99,7 @@ class ProductAddRepository {
         discount: discount,
         dateTime:
             dateAndTime != null ? DateTime.parse(dateAndTime) : DateTime.now(),
+        shippingCategory: shippingCategory,
       );
 
       //Generate search Keywords

@@ -3,6 +3,7 @@
 import 'package:ecommerce_seller_app/models/category_model.dart';
 
 import 'rating.dart';
+import 'shipping_category_model.dart';
 
 class ProductModel {
   final String id;
@@ -17,6 +18,7 @@ class ProductModel {
   final double? kg;
   final int? discount;
   final DateTime? dateTime;
+  final ShippingCategoryModel shippingCategory;
 
   ProductModel({
     required this.id,
@@ -28,6 +30,7 @@ class ProductModel {
     required this.price,
     required this.quantity,
     required this.kg,
+    required this.shippingCategory,
     this.rating,
     this.discount,
     this.dateTime,
@@ -51,6 +54,7 @@ class ProductModel {
             searchKeyword.add(wordToLowercase.substring(0, i));
           }
         }
+
         return CategoryModel.toMap(
             categoryModel: category, searchKeyword: searchKeyword);
       }),
@@ -65,11 +69,15 @@ class ProductModel {
       'discount': productModel.discount,
       'searchKeyword': searchKeyword,
       'dateTime': productModel.dateTime.toString(),
+      'shippingCategory': ShippingCategoryModel.toMap(
+          shippingCategoryModel: productModel.shippingCategory),
     };
   }
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     final productModel = ProductModel(
+        shippingCategory:
+            ShippingCategoryModel.fromMap(map['shippingCategory']),
         id: map['id'] as String,
         name: map['name'] as String,
         description: map['description'] as String,
@@ -104,6 +112,7 @@ class ProductModel {
     double? kg,
     int? discount,
     DateTime? dateTime,
+    ShippingCategoryModel? shippingCategory,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -118,6 +127,7 @@ class ProductModel {
       kg: kg ?? this.kg,
       discount: discount ?? this.discount,
       dateTime: dateTime ?? this.dateTime,
+      shippingCategory: shippingCategory ?? this.shippingCategory,
     );
   }
 }

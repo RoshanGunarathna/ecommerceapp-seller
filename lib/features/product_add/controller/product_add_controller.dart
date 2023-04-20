@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ecommerce_seller_app/features/home/screens/home_screen.dart';
+import 'package:ecommerce_seller_app/models/shipping_category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,6 +45,7 @@ class ProductAddController extends StateNotifier<bool> {
     required String productID,
     required int? discount,
     required double? kg,
+    required ShippingCategoryModel shippingCategory,
   }) async {
     state = true;
     final currentUser = _ref.read(userProvider);
@@ -65,6 +67,7 @@ class ProductAddController extends StateNotifier<bool> {
       kg: kg,
       discount: discount,
       context: context,
+      shippingCategory: shippingCategory,
     );
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),

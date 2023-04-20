@@ -162,7 +162,6 @@ class AuthRepository {
       SellerUserModel? sellerUserModel;
       final querySnapshot = await _sellerUsers
           .where('phoneNumber', isEqualTo: [phoneNumber]).get();
-      print("querySnapshot: ${querySnapshot.docs}");
 
       if (querySnapshot.docs.isNotEmpty) {
         sellerUserModel = querySnapshot.docs
@@ -190,7 +189,6 @@ class AuthRepository {
   }) async {
     var returnData;
     try {
-      print("Name: $name");
       final uid = _auth.currentUser!.uid;
       final phoneNumber = _auth.currentUser!.phoneNumber;
       String photoUrl = ref.read(userProvider)!.profilePic;

@@ -1,4 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_seller_app/core/common/controller/common_get_category_controller.dart';
+import 'package:ecommerce_seller_app/core/common/controller/common_get_shipping_category_controller.dart';
+import 'package:ecommerce_seller_app/models/shipping_category_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,57 +35,73 @@ class HomeRepository {
 
   //get product data
   Stream<List<ProductModel>> getProductData() {
-    return _products.snapshots().map((snap) => snap.docs.map((product) {
-          return ProductModel.fromMap(product.data() as Map<String, dynamic>);
-        }).toList());
+    return _products
+        .orderBy("dateTime", descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((product) {
+              return ProductModel.fromMap(
+                  product.data() as Map<String, dynamic>);
+            }).toList());
   }
 
   //dev codes ....................................................
   //get all the products
-  Future<List<CategoryModel>> getProductDataFuture() async {
+  Future<List<ProductModel>> getProductDataFuture() async {
     final QuerySnapshot querySnapshot =
-        await _firestore.collection("category").get();
+        await _firestore.collection("products").get();
 
     return querySnapshot.docs.map((productData) {
       final product = productData.data();
-      return CategoryModel.fromMap(product as Map<String, dynamic>);
+      return ProductModel.fromMap(product as Map<String, dynamic>);
     }).toList();
   }
 
   //dev codes ....................................................
   //change and save
   Future<void> saveProductData(
-      List<CategoryModel> sellerUserList, Ref ref, BuildContext context) async {
+      List<ProductModel> productList, Ref ref, BuildContext context) async {
     //get the time&date in sri lanka
     String? dateAndTime = await ref
         .read(commonGetDateAndTimeControllerProvider.notifier)
         .getDateAndTime(context);
 
-    for (CategoryModel sellerUser in sellerUserList) {
+    for (ProductModel element in productList) {
       final List<String> searchKeyword = [];
-      final splittedMultipleWords = sellerUser.name.trim().split(" ");
+      final splittedMultipleWords = element.name.trim().split(" ");
       for (var element in splittedMultipleWords) {
         final String wordToLowercase = element.toLowerCase();
         for (var i = 1; i < wordToLowercase.length + 1; i++) {
           searchKeyword.add(wordToLowercase.substring(0, i));
         }
       }
+      // ignore: use_build_context_synchronously
+      final getShippingCategory = await ref
+          .read(commonGetShippingCategoryControllerProvider.notifier)
+          .getShippingCategoryData(context);
 
-      sellerUser = sellerUser.copyWith(
-        dateTime:
-            dateAndTime != null ? DateTime.parse(dateAndTime) : DateTime.now(),
+      final List<CategoryModel> newCategoryList = [];
+      final List<CategoryModel> categoryList = ref.read(categoryProvider)!;
+
+      for (var category in element.category) {
+        newCategoryList
+            .add(categoryList.firstWhere((cat) => cat.name == category.name));
+      }
+
+      element = element.copyWith(
+        shippingCategory: getShippingCategory![2],
+        category: newCategoryList,
       );
 
-      // await _firestore.collection("category").doc(sellerUser.id).set(
-      //     CategoryModel.toMap(
-      //         categoryModel: sellerUser, searchKeyword: searchKeyword));
+      // await _firestore.collection("products").doc(element.id).set(
+      //     ProductModel.toMap(
+      //         productModel: element, searchKeyword: searchKeyword));
     }
   }
 
   //dev codes ....................................................
   //trigger upper methods
   Future<void> getAndSaveProductData(Ref ref, BuildContext context) async {
-    List<CategoryModel> products = await getProductDataFuture();
+    List<ProductModel> products = await getProductDataFuture();
     await saveProductData(products, ref, context);
   }
 }

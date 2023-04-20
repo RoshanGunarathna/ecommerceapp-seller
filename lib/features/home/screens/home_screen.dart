@@ -229,6 +229,6 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
         arguments: product);
 
     //dev codes ....................................................
-    // ref.read(homeControllerProvider.notifier).getAndSaveProductData(context);
+    //ref.read(homeControllerProvider.notifier).getAndSaveProductData(context);
   }
 }

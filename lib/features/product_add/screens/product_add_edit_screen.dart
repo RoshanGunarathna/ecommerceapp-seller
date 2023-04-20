@@ -10,6 +10,7 @@ import 'package:ecommerce_seller_app/features/product_add/controller/product_add
 import 'package:flutter/scheduler.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../core/common/controller/common_get_shipping_category_controller.dart';
 import '../../../core/common/custom_button.dart';
 import '../../../core/common/widgets/custom_textfield.dart';
 
@@ -22,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/category_model.dart';
+import '../../../models/shipping_category_model.dart';
 import '../widget/delete_confimation.dart';
 import '../widget/showDialog.dart';
 
@@ -56,6 +58,14 @@ class _ProductAddEditScreenConsumerState
   List<CategoryModel> _selectedCategory = [];
   List<CategoryModel> _categoryList = [];
 
+  //for the shipping select part
+  List<ShippingCategoryModel> _shippingCategoryList = [
+    ShippingCategoryModel(
+        name: "Select an shipping method", id: "id", price: 0.0)
+  ];
+  ShippingCategoryModel _selectedShippingCategory = ShippingCategoryModel(
+      name: "Select an shipping method", id: "id", price: 0.0);
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -74,11 +84,28 @@ class _ProductAddEditScreenConsumerState
         .getCategoryData(context);
 
     if (isOver) {
-      print("*****this method is run");
       _categoryList = await ref.read(categoryProvider)!;
 
       setState(() {
         _categoryList;
+      });
+    }
+  }
+
+  void getShippingCategoryList() async {
+    final res = await ref
+        .read(commonGetShippingCategoryControllerProvider.notifier)
+        .getShippingCategoryData(context);
+
+    if (res != null) {
+      _shippingCategoryList.addAll(res);
+
+      if (widget.product != null) {
+        _selectedShippingCategory = widget.product!.shippingCategory;
+      }
+
+      setState(() {
+        _shippingCategoryList;
       });
     }
   }
@@ -88,6 +115,7 @@ class _ProductAddEditScreenConsumerState
     _addScreenOrNot();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       refreshCategoryList();
+      getShippingCategoryList();
     });
     // TODO: implement initState
     super.initState();
@@ -126,8 +154,14 @@ class _ProductAddEditScreenConsumerState
           context: ctx, text: 'Please select 1 or more category');
     }
 
+    if (_selectedShippingCategory.id == "id") {
+      return showSnackBar(
+          context: ctx, text: 'Please select your shipping method');
+    }
+
     //save data in firebase
     ref.read(productAddControllerProvider.notifier).saveProductDataInFirebase(
+          shippingCategory: _selectedShippingCategory,
           productImageUrls: _imageUrls,
           productImages: _images,
           productName: _productNameController.text,
@@ -333,6 +367,41 @@ class _ProductAddEditScreenConsumerState
                         "Discount Price \"You can have this field EMPTY\"",
                   ),
                   maxLines: 1,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: DropdownButton(
+                    value: _selectedShippingCategory.name,
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    items:
+                        _shippingCategoryList.map((ShippingCategoryModel item) {
+                      return DropdownMenuItem(
+                        value: item.name,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item.name),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            item.id != "id"
+                                ? Text("\$${item.price}")
+                                : const SizedBox(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? shippingProductname) {
+                      setState(() {
+                        _selectedShippingCategory =
+                            _shippingCategoryList.firstWhere((element) =>
+                                element.name == shippingProductname);
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
