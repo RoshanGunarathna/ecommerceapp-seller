@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils.dart';
 import '../../auth/controller/auth_controller.dart';
 
 class AppBarMenu extends StatelessWidget {

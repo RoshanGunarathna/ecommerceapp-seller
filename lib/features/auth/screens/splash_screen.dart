@@ -17,24 +17,58 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
-  SellerUserModel? userModel;
-  void getData(WidgetRef ref, User data) async {
-    userModel = await ref
+  //SellerUserModel? userModel;
+
+  Stream<SellerUserModel?> getData(WidgetRef ref, User data) async* {
+    // await Future.delayed(
+    //   Duration(seconds: 3),
+    // );
+    final user = ref
         .watch(authControllerProvider.notifier)
         .getUserData(data.uid, context);
-    ref.read(userProvider.notifier).update((state) => userModel);
-    setState(() {});
+
+    yield* user.asStream();
   }
+
+  // void getData(WidgetRef ref, User data) async {
+  //   userModel =
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
     return ref.watch(authStateChangeProvider).when(
           data: (data) {
             if (data != null) {
-              getData(ref, data);
-              if (userModel != null) {
-                return const HomeScreen();
-              }
+              return StreamBuilder(
+                stream: getData(ref, data),
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Scaffold(
+                      body: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Image.asset(logoPath),
+                        ),
+                      ),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Scaffold(
+                      body: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Image.asset(logoPath),
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.data != null) {
+                    return const HomeScreen();
+                  } else {
+                    return const LoginScreen();
+                  }
+                },
+              );
             }
             return const LoginScreen();
           },

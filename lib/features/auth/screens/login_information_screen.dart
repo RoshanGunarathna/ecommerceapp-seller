@@ -65,69 +65,93 @@ class _LoginInformationScreenConsumerState
     return Scaffold(
       body: SafeArea(
           child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Stack(
-              children: [
-                image != null
-                    ? CircleAvatar(
-                        backgroundColor: secondaryColor,
-                        radius: size.height * 0.094,
-                        backgroundImage: FileImage(image!),
-                      )
-                    : CircleAvatar(
-                        backgroundColor: whiteColor,
-                        radius: size.height * 0.094,
-                        backgroundImage: NetworkImage(
-                          user.profilePic,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Stack(
+                children: [
+                  image != null
+                      ? SizedBox(
+                          height: 80,
+                          width: 80,
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(size.height * 0.094),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Image.file(image!),
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height: 80,
+                          width: 80,
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(size.height * 0.094),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Image.network(Constants.avatarDefault),
+                            ),
+                          ),
+                        ),
+                  Positioned(
+                    top: 55,
+                    left: 55,
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: IconButton(
+                        onPressed: () {
+                          selectImage();
+                        },
+                        icon: const Icon(
+                          Icons.add_a_photo,
+                          color: Colors.black,
                         ),
                       ),
-                Positioned(
-                  top: 78,
-                  left: 78,
-                  child: IconButton(
-                    onPressed: () {
-                      selectImage();
-                    },
-                    icon: const Icon(
-                      Icons.add_a_photo,
                     ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Container(
-                  width: size.width * 0.80,
-                  padding: const EdgeInsets.all(20),
-                  child: TextField(
-                    style: const TextStyle(fontSize: 20),
-                    inputFormatters: [LengthLimitingTextInputFormatter(30)],
-                    controller: _nameController,
-                    decoration:
-                        const InputDecoration(hintText: 'Enter your name'),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      style: const TextStyle(fontSize: 20),
+                      inputFormatters: [LengthLimitingTextInputFormatter(30)],
+                      controller: _nameController,
+                      decoration:
+                          const InputDecoration(hintText: 'Enter your name'),
+                    ),
                   ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.circular(20)),
-                  height: 50,
-                  width: size.width * 0.15,
-                  child: IconButton(
-                    color: secondaryColor,
-                    onPressed: () => storeUserData(user: user),
-                    icon: const Icon(Icons.done),
+                  SizedBox(
+                    width: 8,
                   ),
-                ),
-              ],
-            ),
-          ],
+                  Container(
+                    decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(20)),
+                    height: 40,
+                    width: size.width * 0.15,
+                    child: IconButton(
+                      color: secondaryColor,
+                      onPressed: () => storeUserData(user: user),
+                      icon: const Icon(Icons.done),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       )),
     );

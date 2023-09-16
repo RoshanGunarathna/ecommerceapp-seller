@@ -39,7 +39,9 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 0,
-          title: const FittedBox(child: Text('Home Screen')),
+          title: const FittedBox(
+            child: Text('Home Screen'),
+          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 1, left: 7),
@@ -109,10 +111,11 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
   Widget productUi(List<ProductModel> products) {
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 190,
-            childAspectRatio: 3 / 6,
-            crossAxisSpacing: 5,
-            mainAxisSpacing: 5),
+          maxCrossAxisExtent: 190,
+          childAspectRatio: 3 / 6,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+        ),
         itemCount: products.length,
         itemBuilder: (_, index) {
           final product = products[index];

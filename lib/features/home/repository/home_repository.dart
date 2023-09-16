@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_seller_app/core/common/controller/common_get_category_controller.dart';
 import 'package:ecommerce_seller_app/core/common/controller/common_get_shipping_category_controller.dart';
+import 'package:ecommerce_seller_app/features/auth/controller/auth_controller.dart';
 import 'package:ecommerce_seller_app/models/shipping_category_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -61,9 +62,9 @@ class HomeRepository {
   Future<void> saveProductData(
       List<ProductModel> productList, Ref ref, BuildContext context) async {
     //get the time&date in sri lanka
-    String? dateAndTime = await ref
-        .read(commonGetDateAndTimeControllerProvider.notifier)
-        .getDateAndTime(context);
+    // String? dateAndTime = await ref
+    //     .read(commonGetDateAndTimeControllerProvider.notifier)
+    //     .getDateAndTime(context);
 
     for (ProductModel element in productList) {
       final List<String> searchKeyword = [];
@@ -75,26 +76,32 @@ class HomeRepository {
         }
       }
       // ignore: use_build_context_synchronously
-      final getShippingCategory = await ref
-          .read(commonGetShippingCategoryControllerProvider.notifier)
-          .getShippingCategoryData(context);
+      // final getShippingCategory = await ref
+      //     .read(commonGetShippingCategoryControllerProvider.notifier)
+      //     .getShippingCategoryData(context);
 
-      final List<CategoryModel> newCategoryList = [];
-      final List<CategoryModel> categoryList = ref.read(categoryProvider)!;
+      // final List<CategoryModel> newCategoryList = [];
+      // final List<CategoryModel> categoryList = ref.read(categoryProvider)!;
 
-      for (var category in element.category) {
-        newCategoryList
-            .add(categoryList.firstWhere((cat) => cat.name == category.name));
-      }
+      // for (var category in element.category) {
+      //   newCategoryList
+      //       .add(categoryList.firstWhere((cat) => cat.name == category.name));
+      // }
 
-      element = element.copyWith(
-        shippingCategory: getShippingCategory![2],
-        category: newCategoryList,
-      );
+      // element = element.copyWith(
+      //   shippingCategory: getShippingCategory![2],
+      //   category: newCategoryList,
+      // );
+      print(element.name);
 
-      // await _firestore.collection("products").doc(element.id).set(
-      //     ProductModel.toMap(
-      //         productModel: element, searchKeyword: searchKeyword));
+      await _firestore
+          .collection("product_backup")
+          .doc(ref.read(userProvider)!.uid)
+          .collection(element.id)
+          .add(
+            ProductModel.toMap(
+                productModel: element, searchKeyword: searchKeyword),
+          );
     }
   }
 

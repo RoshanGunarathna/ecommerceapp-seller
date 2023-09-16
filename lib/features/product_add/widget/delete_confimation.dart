@@ -10,8 +10,8 @@ void deleteConfirmationDialog({
 }) {
   EdgeInsets? insetPadding =
       const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0);
-  final height = MediaQuery.of(context).size.height * .18;
-  final width = MediaQuery.of(context).size.width * .35;
+  final height = MediaQuery.of(context).size.height * .25;
+  final width = MediaQuery.of(context).size.width * .32;
   showDialog(
     context: context,
     builder: (BuildContext context) {

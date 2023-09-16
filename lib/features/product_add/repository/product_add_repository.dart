@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_seller_app/features/auth/controller/auth_controller.dart';
 import 'package:ecommerce_seller_app/models/shipping_category_model.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -133,9 +134,12 @@ class ProductAddRepository {
   }
 
   //delete a Product
-  FutureEither<bool> deleteAProduct(String productID) async {
+  FutureEither<bool> deleteAProduct(String productID, Ref ref) async {
     try {
+      print(productID);
+      print(ref.read(userProvider)!.uid);
       final docRef = _products.doc(productID);
+
       await docRef.delete();
       return right(true);
     } on FirebaseException catch (e) {

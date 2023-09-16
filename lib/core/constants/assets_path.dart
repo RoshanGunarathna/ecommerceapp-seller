@@ -1,2 +1,2 @@
 // Logo
-const String logoPath = "assets/logos/g_logo.png";
+const String logoPath = "assets/logos/logo.png";

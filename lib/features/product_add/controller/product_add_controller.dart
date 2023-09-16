@@ -87,7 +87,7 @@ class ProductAddController extends StateNotifier<bool> {
   Future<void> deleteAProduct(
       {required BuildContext context, required String productID}) async {
     state = true;
-    final res = await _productAddRepository.deleteAProduct(productID);
+    final res = await _productAddRepository.deleteAProduct(productID, _ref);
     state = false;
     res.fold((l) => showSnackBar(context: context, text: l.message), (r) {
       showSnackBar(context: context, text: "Product is deleted");
